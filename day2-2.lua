@@ -1,11 +1,3 @@
---function getOutcomeReward(myShape, oppShape)
---    if myShape == oppShape
---    then
---        return "D"
---    end
---
---end
-
 function calculateScore(file)
 
     shapeReward = {
