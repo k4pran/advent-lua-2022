@@ -5,7 +5,7 @@ COMMAND_SYMB = '$'
 COMMAND_CD = "cd"
 COMMAND_LS = "ls"
 
-ROOT_DIR = "/"
+ROOT_DIR =  "/"
 PARENT_DIR = ".."
 
 DIR = "dir"
