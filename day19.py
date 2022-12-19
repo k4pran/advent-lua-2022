@@ -34,6 +34,10 @@ class RobotFactory:
 
         self.random_build = [self.build_ore_robot, self.build_clay_robot, self.build_obsidian_robot]
 
+        self.ore_max_cost = max([self.ore_robo_cost[ORE], self.clay_robo_cost[ORE], self.obsidian_robo_cost[ORE], self.geode_robo_cost[ORE]])
+        self.clay_max_cost = max([self.ore_robo_cost[CLAY], self.clay_robo_cost[CLAY], self.obsidian_robo_cost[CLAY], self.geode_robo_cost[CLAY]])
+        self.obsidian_max_cost = max([self.ore_robo_cost[OBISIDIAN], self.clay_robo_cost[OBISIDIAN], self.obsidian_robo_cost[OBISIDIAN], self.geode_robo_cost[OBISIDIAN]])
+
 
     def reset(self):
         self.ore_robots = 1
@@ -109,42 +113,55 @@ class RobotFactory:
                 return False
         return True
 
-    def get_priority(self):
-        ore_cost = self.geode_robo_cost[ORE]
-        obsidian_cost = self.geode_robo_cost[OBISIDIAN]
-        clay_cost = self.obsidian_robo_cost[CLAY]
+    # def get_priority(self):
+    #     ore_cost = self.geode_robo_cost[ORE]
+    #     obsidian_cost = self.geode_robo_cost[OBISIDIAN]
+    #     clay_cost = self.obsidian_robo_cost[CLAY]
+    #
+    #     ore_minutes = ore_cost / (self.ore + 0.000001)
+    #     obsidian_minutes = obsidian_cost / (self.obsidian + 0.000001)
+    #     clay_minutes = clay_cost / (self.clay + 0.000001)
+    #
+    #     if self.can_afford(self.ore_robo_cost) and ore_minutes > obsidian_minutes and ore_minutes > clay_minutes:
+    #         return self.build_ore_robot
+    #
+    #     elif self.can_afford(self.clay_robo_cost) and clay_minutes > obsidian_minutes and clay_minutes > ore_minutes:
+    #         return self.build_clay_robot
+    #
+    #     elif self.can_afford(self.obsidian_robo_cost) and obsidian_minutes > ore_minutes and obsidian_minutes > clay_minutes:
+    #         return self.build_obsidian_robot
+    #
+    #     else:
+    #         return random.choice(self.random_build)
 
-        ore_minutes = ore_cost / (self.ore + 0.000001)
-        obsidian_minutes = obsidian_cost / (self.obsidian + 0.000001)
-        clay_minutes = clay_cost / (self.clay + 0.000001)
+    def is_ore_maxed(self):
+        return self.ore >= self.ore_max_cost
 
-        if self.can_afford(self.ore_robo_cost) and ore_minutes > obsidian_minutes and ore_minutes > clay_minutes:
-            return self.build_ore_robot
+    def is_clay_maxed(self):
+        return self.clay >= self.clay_max_cost
 
-        elif self.can_afford(self.clay_robo_cost) and clay_minutes > obsidian_minutes and clay_minutes > ore_minutes:
-            return self.build_clay_robot
-
-        elif self.can_afford(self.obsidian_robo_cost) and obsidian_minutes > ore_minutes and obsidian_minutes > clay_minutes:
-            return self.build_obsidian_robot
-
-        else:
-            return random.choice(self.random_build)
-
+    def is_obsidian_maxed(self):
+        return self.obsidian >= self.obsidian_max_cost
 
     def execute_strategy(self):
         if self.can_afford(self.geode_robo_cost):
             self.build_geode_robot()
             return
 
-        # if self.clay_robots == 0 and self.can_afford(self.clay_robo_cost):
-        #     self.build_clay_robot()
-        #     return
-        #
-        # if self.obsidian_robots == 0 and self.can_afford(self.obsidian_robo_cost):
-        #     self.build_obsidian_robot()
-        #     return
+        choice = []
+        if not self.is_ore_maxed():
+            choice.append(self.build_ore_robot)
 
-        self.get_priority()()
+        if not self.is_clay_maxed():
+            choice.append(self.build_clay_robot)
+
+        if not self.is_obsidian_maxed():
+            choice.append(self.build_obsidian_robot)
+
+        if random.random() > 0.5:
+            random.choice(choice)()
+        else:
+            random.choice(self.random_build)()
 
 
     def build_ore_robot(self):
@@ -216,25 +233,30 @@ def parse_costs(line):
 
 
 with open("resources/day19.txt", 'r') as f:
-    factories = {}
-    for i, line in enumerate(f.read().splitlines()):
+    factories = []
+    for t, line in enumerate(f.read().splitlines()):
         ore_costs, clay_costs, obsidian_costs, geode_costs = parse_costs(line)
 
-        blueprint = i + 1
+        blueprint = t + 1
         factory = RobotFactory(blueprint, ore_costs, clay_costs, obsidian_costs, geode_costs)
-        factories[blueprint] = factory
+        factories.append(factory)
 
 
-    time = 24
-    most_geodes = 0
-    for cycle in range(1000):
-        # print("\n\n\nCYCLE NUMBER " + str(cycle))
-        for i in range(time):
-            # print("Minute " + str(i + 1))
-            factories[1].step()
-        geodes = factories[1].geodes
-        factories[1].reset()
-        if geodes > most_geodes:
-            most_geodes = geodes
+    total_quality = 0
+    for i, factory in enumerate(factories):
+        time = 24
+        most_geodes = 0
+        for cycle in range(100000):
+            # print("\n\n\nCYCLE NUMBER " + str(cycle))
+            for t in range(time):
+                # print("Minute " + str(i + 1))
+                factory.step()
+            geodes = factory.geodes
+            factory.reset()
+            if geodes > most_geodes:
+                most_geodes = geodes
+        quality = most_geodes * (i + 1)
+        total_quality += quality
+        print(total_quality)
 
-    print(most_geodes)
+    print(total_quality)
