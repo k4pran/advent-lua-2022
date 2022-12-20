@@ -1,5 +1,6 @@
 import re
 import random
+from queue import Queue
 
 ORE = "ore"
 CLAY = "clay"
@@ -135,13 +136,13 @@ class RobotFactory:
     #         return random.choice(self.random_build)
 
     def is_ore_maxed(self):
-        return self.ore >= self.ore_max_cost
+        return self.ore >= self.ore_max_cost or self.ore_robots >= self.ore_max_cost
 
     def is_clay_maxed(self):
-        return self.clay >= self.clay_max_cost
+        return self.clay >= self.clay_max_cost or self.clay_robots >= self.clay_max_cost
 
     def is_obsidian_maxed(self):
-        return self.obsidian >= self.obsidian_max_cost
+        return self.obsidian >= self.obsidian_max_cost or self.obsidian_robots >= self.obsidian_max_cost
 
     def execute_strategy(self):
         if self.can_afford(self.geode_robo_cost):
@@ -158,8 +159,10 @@ class RobotFactory:
         if not self.is_obsidian_maxed():
             choice.append(self.build_obsidian_robot)
 
-        if random.random() > 0.5:
+        if random.random() > 0.4 and len(choice) > 0:
             random.choice(choice)()
+        elif len(choice) == 0:
+            return
         else:
             random.choice(self.random_build)()
 
@@ -246,6 +249,7 @@ with open("resources/day19.txt", 'r') as f:
     for i, factory in enumerate(factories):
         time = 24
         most_geodes = 0
+        visited = Queue()
         for cycle in range(100000):
             # print("\n\n\nCYCLE NUMBER " + str(cycle))
             for t in range(time):
