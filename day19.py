@@ -159,7 +159,7 @@ class RobotFactory:
         if not self.is_obsidian_maxed():
             choice.append(self.build_obsidian_robot)
 
-        if random.random() > 0.4 and len(choice) > 0:
+        if random.random() > 0.3 and len(choice) > 0:
             random.choice(choice)()
         elif len(choice) == 0:
             return
@@ -245,7 +245,8 @@ with open("resources/day19.txt", 'r') as f:
         factories.append(factory)
 
 
-    total_quality = 0
+    # # Part 1
+    total_geodes = 0
     for i, factory in enumerate(factories):
         time = 24
         most_geodes = 0
@@ -260,7 +261,28 @@ with open("resources/day19.txt", 'r') as f:
             if geodes > most_geodes:
                 most_geodes = geodes
         quality = most_geodes * (i + 1)
-        total_quality += quality
-        print(total_quality)
+        total_geodes += quality
+        print(total_geodes)
 
-    print(total_quality)
+    print(total_geodes)
+
+    # Part 3
+    total_geodes = 1
+    for i, factory in enumerate(factories[:3]):
+        time = 32
+        most_geodes = 0
+        visited = Queue()
+        for cycle in range(1000000):
+            # print("\n\n\nCYCLE NUMBER " + str(cycle))
+            for t in range(time):
+                # print("Minute " + str(i + 1))
+                factory.step()
+            geodes = factory.geodes
+            factory.reset()
+            if geodes > most_geodes:
+                most_geodes = geodes
+        quality = most_geodes
+        total_geodes *= quality
+        print(geodes)
+
+    print(total_geodes)
